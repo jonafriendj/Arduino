@@ -59,6 +59,7 @@ void HTTPClient::clear()
     _headers.clear();
     _location.clear();
     _payload.reset();
+     _host = emptyString;
 }
 
 
@@ -195,9 +196,9 @@ bool HTTPClient::beginInternal(const String& __url, const char* expectedProtocol
  * end
  * called after the payload is handled
  */
-void HTTPClient::end(void)
+void HTTPClient::end(bool preserveClient)
 {
-    disconnect(false);
+    disconnect(preserveClient);
     clear();
 }
 
@@ -223,12 +224,14 @@ void HTTPClient::disconnect(bool preserveClient)
                 _client->stop();
                 if (!preserveClient) {
                     _client = nullptr;
+                     _host = emptyString;
                 }
             }
         }
     } else {
         if (!preserveClient && _client) { // Also destroy _client if not connected()
             _client = nullptr;
+             _host = emptyString;
         }
 
         DEBUG_HTTPCLIENT("[HTTP-Client][end] tcp is closed\n");
